@@ -8,7 +8,12 @@
                 <div 
                     v-for="(letter, index) in typePrompt" 
                     :key="index"
-                    :class="[index < typed.length ? (typePrompt[index] == typed[index] ? 'correct' : 'incorrect') : '']"
+                    class="border-control"
+                    :class="{
+                        'correct': typed[index] === letter,
+                        'incorrect': typed[index] !== letter && typed[index] !== undefined,
+                        'cursor': index === typed.length
+                        }"
                     v-html="letter === ' ' ? '&nbsp;' : letter">
                 </div>
             </div>
@@ -59,11 +64,32 @@ onMounted(() => {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+
+    /* text styling */
+    font-size: x-large;
 }
 .correct {
     color: white;
 }
 .incorrect {
     color: rgb(167, 57, 57);
+}
+.cursor {
+  position: relative;
+  display: inline-block; /* Ensures the pseudo-element is positioned relative to the text */
+}
+.cursor::before {
+  content: ''; /* Required for the pseudo-element to display */
+  position: absolute;
+  top: 15%;
+  width: 2px; /* Border thickness */
+  height: 70%; /* Adjust the height of the border here */
+  background-color: white;
+  animation: blink 1s steps(2, start) infinite;
+}
+@keyframes blink {
+    to {
+        visibility: hidden;
+    }
 }
 </style>
