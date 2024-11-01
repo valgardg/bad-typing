@@ -12,7 +12,7 @@
                     :class="{
                         'correct': typed[index] === letter,
                         'incorrect': typed[index] !== letter && typed[index] !== undefined,
-                        'cursor': index === typed.length
+                        'cursor': index === typed.length && isFocused
                         }"
                     v-html="letter === ' ' ? '&nbsp;' : letter">
                 </div>
@@ -24,6 +24,8 @@
             v-model="typed"
             @keydown="handleKeyDown"
             @input="handleInput"
+            @focus="onFocus"
+            @blur="onBlur"
             style="opacity: 0; position: absolute; left: -9999px;"
             ref="typingInput"
         />
@@ -33,10 +35,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 
-const typePrompt = ref('Brawl Stars was originally designed in portrait mode during beta, but switched to landscape mode due to player feedback for better controls and gameplay. However, based on player feedback, Supercell switched the game to landscape mode, which allowed for better control over movement and aiming, improving the overall gameplay experience. This change was hugely popular and has stuck with the game ever since!');
+const typePrompt = ref('Brawl Stars was originally designed in portrait mode during beta, but switched to landscape mode due to player feedback for better controls and gameplay. However, based on lots of player feedback, Supercell switched the game to landscape mode, which allowed for better control over movement and aiming, improving the overall gameplay experience. This change was hugely popular and has stuck with the game ever since!');
 const typed = ref('');
 const typingInput = ref<HTMLInputElement | null>(null);
-
 
 const handleKeyDown = (event) => {
     typingInput.value?.focus();
@@ -54,6 +55,15 @@ onMounted(() => {
     console.log("Mounted!!!")
     typingInput.value?.focus();
 })
+
+// focus and blur event handling for hidden input element
+const isFocused = ref(false);
+const onFocus = () => {
+    isFocused.value = true;
+}
+const onBlur = () => {
+    isFocused.value = false;
+}
 </script>
 
 <style scoped>
