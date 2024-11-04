@@ -39,12 +39,12 @@ const typePrompt = ref('Brawl Stars was originally designed in portrait mode dur
 const typed = ref('');
 const typingInput = ref<HTMLInputElement | null>(null);
 
-const handleKeyDown = (event) => {
+const handleKeyDown = () => {
     typingInput.value?.focus();
 }
 
-const handleInput = (event) => {
-    console.log("User input:", typed);
+const handleInput = () => {
+    console.log("User input:", typed.value);
 }
 
 const focusInput = () => {
