@@ -53,7 +53,9 @@ const typed = ref('');
 const typingInput = ref<HTMLInputElement | null>(null);
 
 const handleKeyDown = () => {
-    typingInput.value?.focus();
+    if(canType.value) {
+        typingInput.value?.focus();
+    }
 }
 
 const handleInput = () => {
@@ -61,10 +63,11 @@ const handleInput = () => {
         startClock();
     }
     console.log("User input:", typed.value);
-    if(typed.value.length == typePrompt.value.length) {
+    if(typed.value.length >= typePrompt.value.length) {
         stopClock();
         canType.value = false;
         calculateStats();
+        typingInput.value?.blur();
     }
 }
 
