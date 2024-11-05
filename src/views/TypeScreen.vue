@@ -3,7 +3,7 @@
     <div>
         <!-- input section -->
         <div @click="focusInput">
-            <div class="typing-prompt">Type the following prompt:</div>
+            <div class="">Type the following prompt:</div>
             <div class="prompt-container">
                 <div 
                     v-for="(letter, index) in typePrompt" 
@@ -18,6 +18,18 @@
                 </div>
             </div>
         </div>
+        <!-- clock + stats div -->
+        <div class="time-div">
+            <p>{{ minutes }}m {{ seconds }}.{{ milliseconds }}s</p>
+        </div>
+
+        <div class="stats-div">
+            <p>wpm - {{ wpm }}</p>
+            <p>accuracy - {{ accuracy }}</p>
+            <p>correct - {{ correct }}</p>
+            <p>errors - {{ errors }}</p>
+        </div>
+
         <!-- hidden input to listen capture user typing -->
         <input 
             type="text"
@@ -33,8 +45,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
+const canType = ref(true);
 const typePrompt = ref('Brawl Stars was originally designed in portrait mode during beta, but switched to landscape mode due to player feedback for better controls and gameplay. However, based on lots of player feedback, Supercell switched the game to landscape mode, which allowed for better control over movement and aiming, improving the overall gameplay experience. This change was hugely popular and has stuck with the game ever since!');
 const typed = ref('');
 const typingInput = ref<HTMLInputElement | null>(null);
@@ -44,10 +57,21 @@ const handleKeyDown = () => {
 }
 
 const handleInput = () => {
+    if (!running.value) {
+        startClock();
+    }
     console.log("User input:", typed.value);
+    if(typed.value.length == typePrompt.value.length) {
+        stopClock();
+        canType.value = false;
+        calculateStats();
+    }
 }
 
 const focusInput = () => {
+    if(!canType.value) {
+        return;
+    }
     typingInput.value?.focus();
 }
 
@@ -64,12 +88,58 @@ const onFocus = () => {
 const onBlur = () => {
     isFocused.value = false;
 }
+
+// clock implementation
+const running = ref(false);
+const startTime = ref(0);
+const elapsedTime = ref(0);
+let interval: number | null = null;
+
+const minutes = computed(() => Math.floor(elapsedTime.value / 60000));
+const seconds = computed(() => Math.floor((elapsedTime.value % 60000) / 1000));
+const milliseconds = computed(() => elapsedTime.value % 1000);
+
+const startClock = () => {
+    if (!running.value) {
+        running.value = true;
+        startTime.value = Date.now() - elapsedTime.value;
+        interval = setInterval(() => {
+            elapsedTime.value = Date.now() - startTime.value;
+        }, 10);
+    }
+}
+
+const stopClock = () => {
+    if(interval) {
+        running.value = false;
+        clearInterval(interval);
+    }
+}
+
+// stats
+const errors = ref(0);
+const correct = ref(0);
+const accuracy = ref(0);
+const wpm = ref(0);
+
+const calculateStats = () => {
+    let total = 0;
+    let correctly_typed = 0;
+
+    for(let i = 0; i < typePrompt.value.length; i++) {
+        if (typed.value[i] == typePrompt.value[i]) {
+            correctly_typed += 1;
+        }
+        total += 1;
+    }
+    correct.value = correctly_typed;
+    errors.value = total - correctly_typed;
+    accuracy.value = Math.round(((correctly_typed / total) * 100) * 100) / 100;
+    wpm.value = Math.round(((correctly_typed / 5) / (minutes.value + (seconds.value / 60))) * 100) / 100;
+}
 </script>
 
 <style scoped>
-.typing-prompt {
-    color: white;
-}
 .prompt-container {
     display: flex;
     flex-direction: row;
@@ -101,5 +171,14 @@ const onBlur = () => {
     to {
         visibility: hidden;
     }
+}
+/* clock and stats styles */
+.time-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stats-div {
+    font-size: large;
 }
 </style>
