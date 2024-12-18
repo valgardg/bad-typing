@@ -30,12 +30,16 @@
             <p>errors - {{ errors }} characters</p>
         </div>
 
+        <div>
+            <button @click="() => { mistakeMode = !mistakeMode }" style="opacity: 0; width: 10rem; height: 10rem;">Toggle Mistake Mode</button>
+        </div>
+
         <!-- hidden input to listen capture user typing -->
         <input 
             type="text"
             v-model="typed"
             @keydown="handleKeyDown"
-            @input="handleInput"
+            @input="handleInput($event)"
             @focus="onFocus"
             @blur="onBlur"
             style="opacity: 0; position: absolute; left: -9999px;"
@@ -47,7 +51,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { paragraph } from 'txtgen';
+import { getMistake } from '@/utils/mistake';
+import confetti from 'canvas-confetti';
 
+
+const mistakeMode = ref(false);
 const canType = ref(true);
 const typePrompt = ref('Hailey is end game. She will be happy with her Ally.');
 const typed = ref('');
@@ -59,16 +67,45 @@ const handleKeyDown = () => {
     }
 }
 
-const handleInput = () => {
+const handleInput = (event: Event) => {
     if (!running.value) {
         startClock();
     }
-    console.log("User input:", typed.value);
+    const inputEvent = event as InputEvent;
+    const typedChar = (inputEvent.data || '').slice(-1);
+
+    // handle prank logic
+    if (mistakeMode.value && typed.value.length > 0 && typedChar.match(/[a-zA-Z]/) && Math.random() < 0.07) {
+        var mistakeChar = getMistake(typedChar);
+        typed.value = typed.value.slice(0, -1) + mistakeChar;
+    }
     if(typed.value.length >= typePrompt.value.length) {
         stopClock();
         canType.value = false;
         calculateStats();
         typingInput.value?.blur();
+
+        // confetti animation
+        var duration = 15 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min: number, max: number) {
+        return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function() {
+        var timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+            return clearInterval(interval);
+        }
+
+        var particleCount = 50 * (timeLeft / duration);
+        // since particles fall down, start a bit higher than random
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
     }
 }
 
