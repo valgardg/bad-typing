@@ -24,10 +24,10 @@
         </div>
 
         <div class="stats-div">
-            <p>wpm - {{ wpm }}</p>
-            <p>accuracy - {{ accuracy }}</p>
-            <p>correct - {{ correct }}</p>
-            <p>errors - {{ errors }}</p>
+            <p class="wpm-text">wpm - {{ wpm }}</p>
+            <p>accuracy - {{ accuracy }}%</p>
+            <p>correct - {{ correct }} characters</p>
+            <p>errors - {{ errors }} characters</p>
         </div>
 
         <!-- hidden input to listen capture user typing -->
@@ -46,9 +46,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
+import { paragraph } from 'txtgen';
 
 const canType = ref(true);
-const typePrompt = ref('Brawl Stars was originally designed in portrait mode during beta, but switched to landscape mode due to player feedback for better controls and gameplay. However, based on lots of player feedback, Supercell switched the game to landscape mode, which allowed for better control over movement and aiming, improving the overall gameplay experience. This change was hugely popular and has stuck with the game ever since!');
+const typePrompt = ref('Hailey is end game. She will be happy with her Ally.');
 const typed = ref('');
 const typingInput = ref<HTMLInputElement | null>(null);
 
@@ -81,6 +82,7 @@ const focusInput = () => {
 onMounted(() => {
     console.log("Mounted!!!")
     typingInput.value?.focus();
+    typePrompt.value = paragraph(3);
 })
 
 // focus and blur event handling for hidden input element
@@ -183,5 +185,9 @@ const calculateStats = () => {
 }
 .stats-div {
     font-size: large;
+}
+.wpm-text {
+    font-size: x-large;
+    font-weight: bold;
 }
 </style>
