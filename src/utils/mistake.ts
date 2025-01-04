@@ -15,6 +15,7 @@ export const getMistake = (char: string): string => {
         "asdfghjkl",
         "zxcvbnm",
     ];
+    
     for (let i = 0; i < qwerty.length; i++) {
         const row = qwerty[i];
         const index = row.indexOf(char);
